@@ -1,4 +1,4 @@
-init: docker-down-clear docker-pull docker-build docker-up-d composer-install db-migrate assets-install assets-watch
+init: docker-down-clear docker-pull docker-build docker-up-d composer-install db-migrate assets-install assets-watch http-client
 up: docker-up-d composer-install db-migrate assets-install assets-watch
 
 docker-up:
@@ -26,16 +26,19 @@ db-migrate-diff:
 	@docker compose run --rm php-cli php bin/console doctrine:migrations:diff
 
 db-migrate-prev:
-	docker-compose run --rm php-cli php bin/console doctrine:migrations:migrate prev
+	@docker compose run --rm php-cli php bin/console doctrine:migrations:migrate prev
 
 composer-install:
-	docker-compose run --rm php-cli composer install
+	@docker compose run --rm php-cli composer install
 
 assets-install:
-	docker-compose run --rm node yarn install
+	@docker compose run --rm node yarn install
 
 assets-build:
-	docker-compose run node yarn build
+	@docker compose run node yarn build
 
 assets-watch:
-	docker-compose run node yarn watch
+	@docker compose run node yarn watch
+http-client:
+	@docker compose run --rm php-cli composer require symfony/http-client
+
