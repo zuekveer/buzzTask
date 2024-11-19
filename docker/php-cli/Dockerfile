@@ -23,5 +23,8 @@ RUN usermod -u ${UID} www-data
 
 # Set working directory
 WORKDIR /var/www/test-task
+# Install Composer dependencies
+RUN composer require symfony/http-client
+
 
 USER ${UID}
