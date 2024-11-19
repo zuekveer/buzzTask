@@ -1,0 +1,27 @@
+###> ide ###
+/.idea
+###< ide ###
+
+###> symfony/framework-bundle ###
+.env
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
+
+###> data (mysql, rabbitmq, ...) ###
+/data/
+###< data (mysql, rabbitmq, ...) ###
+
+###> docker
+docker-compose.override.yml
+###< docker
+
+###> symfony/webpack-encore-bundle ###
+/node_modules/
+/public/build/
+###< symfony/webpack-encore-bundle ###

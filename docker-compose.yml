@@ -1,0 +1,51 @@
+version: "3.4"
+services:
+    nginx:
+        build:
+            context: docker/nginx
+        volumes:
+            - ./:/var/www/test-task
+        ports:
+            - "8000:80"
+        depends_on:
+            - php-fpm
+
+    php-fpm:
+        build:
+            context: docker/php-fpm
+        volumes:
+            - ./:/var/www/test-task
+        depends_on:
+            - mysql
+
+    php-cli:
+        build:
+            context: docker/php-cli
+        volumes:
+            - ./:/var/www/test-task
+
+    node:
+        image: node:18.4.0-alpine
+        working_dir: /app
+        volumes:
+            - ./:/app
+
+    mysql:
+        image: mysql:${MYSQL_VERSION:-8.0.30}
+        environment:
+            MYSQL_DATABASE: db_name
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_USER: db_user
+            MYSQL_PASSWORD: db_password
+        ports:
+            - "33061:3306"
+        volumes:
+            - ./data/mysql:/var/lib/mysql
+
+    myadmin:
+        image: phpmyadmin/phpmyadmin
+        environment:
+            PMA_HOST: mysql
+            UPLOAD_LIMIT: 3000000000
+        ports:
+            - "8080:80"

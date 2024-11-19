@@ -1,0 +1,20 @@
+{
+    "license": "UNLICENSED",
+    "private": true,
+    "version": "1.1.0",
+    "scripts": {
+        "dev-server": "encore dev-server",
+        "dev": "encore dev",
+        "watch": "encore dev --watch",
+        "build": "encore production --progress"
+    },
+    "dependencies": {
+        "@babel/core": "^7.25.2",
+        "@babel/preset-env": "^7.25.3",
+        "@symfony/webpack-encore": "^4.6.1",
+        "webpack": "^5.93.0",
+        "webpack-cli": "^5.1.4",
+        "webpack-notifier": "^1.15.0"
+    },
+    "devDependencies": {}
+}
