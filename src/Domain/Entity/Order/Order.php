@@ -39,7 +39,7 @@ class Order
     #[ORM\Column(type: 'integer')]
     private int $equalPrice;
 
-    #[ORM\Column(type: 'datetime')]
+    #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $created;
 
     public function getId(): int
@@ -47,9 +47,10 @@ class Order
         return $this->id;
     }
 
-    public function setId(int $id): void
+    public function setEventId(int $eventId): self
     {
-        $this->id = $id;
+        $this->eventId = $eventId;
+        return $this;
     }
 
     public function getEventId(): int
@@ -57,9 +58,10 @@ class Order
         return $this->eventId;
     }
 
-    public function setEventId(int $eventId): void
+    public function setEventDate(string $eventDate): self
     {
-        $this->eventId = $eventId;
+        $this->eventDate = $eventDate;
+        return $this;
     }
 
     public function getEventDate(): string
@@ -67,9 +69,10 @@ class Order
         return $this->eventDate;
     }
 
-    public function setEventDate(string $eventDate): void
+    public function setTicketAdultPrice(int $ticketAdultPrice): self
     {
-        $this->eventDate = $eventDate;
+        $this->ticketAdultPrice = $ticketAdultPrice;
+        return $this;
     }
 
     public function getTicketAdultPrice(): int
@@ -77,9 +80,10 @@ class Order
         return $this->ticketAdultPrice;
     }
 
-    public function setTicketAdultPrice(int $ticketAdultPrice): void
+    public function setTicketAdultQuantity(int $ticketAdultQuantity): self
     {
-        $this->ticketAdultPrice = $ticketAdultPrice;
+        $this->ticketAdultQuantity = $ticketAdultQuantity;
+        return $this;
     }
 
     public function getTicketAdultQuantity(): int
@@ -87,9 +91,10 @@ class Order
         return $this->ticketAdultQuantity;
     }
 
-    public function setTicketAdultQuantity(int $ticketAdultQuantity): void
+    public function setTicketKidPrice(int $ticketKidPrice): self
     {
-        $this->ticketAdultQuantity = $ticketAdultQuantity;
+        $this->ticketKidPrice = $ticketKidPrice;
+        return $this;
     }
 
     public function getTicketKidPrice(): int
@@ -97,9 +102,10 @@ class Order
         return $this->ticketKidPrice;
     }
 
-    public function setTicketKidPrice(int $ticketKidPrice): void
+    public function setTicketKidQuantity(int $ticketKidQuantity): self
     {
-        $this->ticketKidPrice = $ticketKidPrice;
+        $this->ticketKidQuantity = $ticketKidQuantity;
+        return $this;
     }
 
     public function getTicketKidQuantity(): int
@@ -107,9 +113,10 @@ class Order
         return $this->ticketKidQuantity;
     }
 
-    public function setTicketKidQuantity(int $ticketKidQuantity): void
+    public function setBarcode(string $barcode): self
     {
-        $this->ticketKidQuantity = $ticketKidQuantity;
+        $this->barcode = $barcode;
+        return $this;
     }
 
     public function getBarcode(): string
@@ -117,9 +124,10 @@ class Order
         return $this->barcode;
     }
 
-    public function setBarcode(string $barcode): void
+    public function setEqualPrice(int $equalPrice): self
     {
-        $this->barcode = $barcode;
+        $this->equalPrice = $equalPrice;
+        return $this;
     }
 
     public function getEqualPrice(): int
@@ -127,18 +135,14 @@ class Order
         return $this->equalPrice;
     }
 
-    public function setEqualPrice(int $equalPrice): void
+    public function setCreated(\DateTimeImmutable $created): self
     {
-        $this->equalPrice = $equalPrice;
+        $this->created = $created;
+        return $this;
     }
 
     public function getCreated(): \DateTimeImmutable
     {
         return $this->created;
-    }
-
-    public function setCreated(\DateTimeImmutable $created): void
-    {
-        $this->created = $created;
     }
 }

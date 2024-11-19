@@ -1,4 +1,4 @@
-init: docker-down-clear docker-pull docker-build docker-up-d composer-install db-migrate assets-install assets-watch http-client
+init: docker-down-clear docker-pull docker-build docker-up-d composer-install db-migrate assets-install assets-watch
 up: docker-up-d composer-install db-migrate assets-install assets-watch
 
 docker-up:
@@ -39,6 +39,3 @@ assets-build:
 
 assets-watch:
 	@docker compose run node yarn watch
-http-client:
-	@docker compose run --rm php-cli composer require symfony/http-client
-

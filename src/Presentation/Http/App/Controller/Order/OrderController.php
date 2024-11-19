@@ -32,10 +32,9 @@ class OrderController extends AbstractController
                 (int) $data['ticket_kid_quantity']
             );
 
-            return new JsonResponse(['message' => 'Order created successfully.']);
+            return new JsonResponse(['message' => 'Order created successfully.'], 201);
         } catch (\Throwable $e) {
             return new JsonResponse(['error' => $e->getMessage()], 400);
         }
     }
 }
-
