@@ -1,0 +1,9 @@
+app_order_create:
+  path: /api/orders/create
+  controller: App\Presentation\Http\App\Controller\Order\OrderController::create
+  methods: POST
+
+app_order_get:
+  path: /api/orders/{id}
+  controller: App\Presentation\Http\App\Controller\Order\OrderController::get
+  methods: GET
