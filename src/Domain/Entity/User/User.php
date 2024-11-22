@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace App\Domain\Entity\User;
 
-use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'user')]
+#[ORM\HasLifecycleCallbacks]
 class User
 {
-    #[ORM\Id, ORM\Column(type: 'integer', options: ['unsigned' => true]), ORM\GeneratedValue]
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
     private ?int $id;
 
     #[ORM\Column(type: 'boolean', options: ['default' => 0])]
@@ -24,36 +26,29 @@ class User
     private string $password;
 
     #[ORM\Column(type: 'datetime_immutable')]
-    private ?DateTimeImmutable $createdAt;
+    private ?\DateTimeImmutable $createdAt;
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    private ?\DateTimeImmutable $updatedAt;
 
     public function __construct(
         ?string $username,
         string $password,
-        ?DateTimeImmutable $createdAt,
+        ?\DateTimeImmutable $createdAt = null,
         bool $state = true,
     ) {
         $this->id = null;
-        $this->createdAt = $createdAt;
-
-        $this->edit(
-            username: $username,
-            password: $password,
-            state: $state,
-        );
-    }
-
-    public function edit(?string $username, string $password, bool $state): self
-    {
+        $this->state = $state;
         $this->username = $username;
         $this->password = $password;
-        $this->state = $state;
-
-        return $this;
+        $this->createdAt = $createdAt ?? new \DateTimeImmutable();
+        $this->updatedAt = $createdAt ?? new \DateTimeImmutable();
     }
 
-    public function __toString(): string
+    #[ORM\PreUpdate]
+    public function setUpdatedAt(): void
     {
-        return $this->username;
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -71,9 +66,14 @@ class User
         return $this->password;
     }
 
-    public function getCreatedAt(): ?DateTimeImmutable
+    public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
     }
 
     public function getState(): bool

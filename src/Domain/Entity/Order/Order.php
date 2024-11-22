@@ -7,13 +7,18 @@ namespace App\Domain\Entity\Order;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[ORM\Table(name: 'order')]
+#[ORM\Table(name: 'orders')]
+#[ORM\HasLifecycleCallbacks]
 class Order
 {
+
+    #[ORM\OneToMany(targetEntity: 'App\Domain\Entity\Ticket\Ticket', mappedBy: 'order')]
+    private iterable $tickets;  // relation to tickets
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer', unique: true)]
-    private int $id;
+    private ?int $id;
 
     #[ORM\Column(type: 'integer')]
     private int $eventId;
@@ -40,7 +45,23 @@ class Order
     private int $equalPrice;
 
     #[ORM\Column(type: 'datetime_immutable')]
-    private \DateTimeImmutable $created;
+    private \DateTimeImmutable $createdAt;
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    private \DateTimeImmutable $updatedAt;
+
+    #[ORM\PrePersist]
+    public function setCreatedAt(): void
+    {
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    #[ORM\PreUpdate]
+    public function setUpdatedAt(): void
+    {
+        $this->updatedAt = new \DateTimeImmutable();
+    }
 
     public function getId(): int
     {
@@ -135,14 +156,13 @@ class Order
         return $this->equalPrice;
     }
 
-    public function setCreated(\DateTimeImmutable $created): self
+    public function getCreatedAt(): \DateTimeImmutable
     {
-        $this->created = $created;
-        return $this;
+        return $this->createdAt;
     }
 
-    public function getCreated(): \DateTimeImmutable
+    public function getUpdatedAt(): \DateTimeImmutable
     {
-        return $this->created;
+        return $this->updatedAt;
     }
 }
