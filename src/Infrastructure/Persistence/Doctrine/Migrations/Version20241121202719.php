@@ -7,11 +7,14 @@ namespace App\Infrastructure\Persistence\Doctrine\Migrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
+/**
+ * Auto-generated Migration: Please modify to your needs!
+ */
 final class Version20241121202719 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Add missing columns for the orders table';
+        return '';
     }
 
     public function up(Schema $schema): void
