@@ -125,7 +125,7 @@ class OrderController extends AbstractController
                 'created' => $order->getCreatedAt()->format('Y-m-d H:i:s'),
             ]);
         } catch (\Throwable $e) {
-            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(['error' => $e->getMessage()], 400);
         }
     }
 }
