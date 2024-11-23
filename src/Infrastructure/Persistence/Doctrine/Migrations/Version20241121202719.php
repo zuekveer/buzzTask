@@ -7,14 +7,11 @@ namespace App\Infrastructure\Persistence\Doctrine\Migrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-/**
- * Auto-generated Migration: Please modify to your needs!
- */
 final class Version20241121202719 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '';
+        return 'Create orders, tickets, and ticket_barcodes tables with all required columns and relationships.';
     }
 
     public function up(Schema $schema): void
@@ -30,7 +27,9 @@ final class Version20241121202719 extends AbstractMigration
             ticket_kid_price INT NOT NULL,
             ticket_kid_quantity INT NOT NULL,
             equal_price INT NOT NULL,
-            created DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\',
+            barcode VARCHAR(120) NOT NULL UNIQUE,  -- Added barcode column
+            created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\',
+            updated_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\',
             PRIMARY KEY(id)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB;
         ');
@@ -39,8 +38,8 @@ final class Version20241121202719 extends AbstractMigration
         $this->addSql('
         CREATE TABLE tickets (
             id INT AUTO_INCREMENT NOT NULL,
-            order_id INT NOT NULL,
-            type VARCHAR(20) NOT NULL,  -- Changed from ENUM to VARCHAR
+            order_id INT DEFAULT NULL,
+            type VARCHAR(255) NOT NULL,
             price INT NOT NULL,
             quantity INT NOT NULL,
             PRIMARY KEY(id),
@@ -52,7 +51,7 @@ final class Version20241121202719 extends AbstractMigration
         $this->addSql('
         CREATE TABLE ticket_barcodes (
             id INT AUTO_INCREMENT NOT NULL,
-            ticket_id INT NOT NULL,
+            ticket_id INT DEFAULT NULL,
             barcode VARCHAR(120) NOT NULL UNIQUE,
             PRIMARY KEY(id),
             CONSTRAINT FK_BARCODES_TICKET FOREIGN KEY (ticket_id) REFERENCES tickets (id) ON DELETE CASCADE
@@ -62,6 +61,7 @@ final class Version20241121202719 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
+        // Drop tables in reverse order
         $this->addSql('DROP TABLE ticket_barcodes');
         $this->addSql('DROP TABLE tickets');
         $this->addSql('DROP TABLE orders');
