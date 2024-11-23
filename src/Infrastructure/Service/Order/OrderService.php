@@ -46,9 +46,12 @@ class OrderService
 
         // Calculate the total price based on quantities and prices
         $totalPrice = $this->calculateTotalPrice(
-            $ticketAdultPrice, $ticketAdultQuantity,
-            $ticketKidPrice, $ticketKidQuantity,
-            $ticketVipPrice, $ticketVipQuantity
+            $ticketAdultPrice,
+            $ticketAdultQuantity,
+            $ticketKidPrice,
+            $ticketKidQuantity,
+            $ticketVipPrice,
+            $ticketVipQuantity
         );
 
         $equalPrice = $totalPrice; // Set equalPrice to the calculated total price
@@ -108,9 +111,12 @@ class OrderService
     }
 
     private function calculateTotalPrice(
-        int $ticketAdultPrice, int $ticketAdultQuantity,
-        int $ticketKidPrice, int $ticketKidQuantity,
-        int $ticketVipPrice, int $ticketVipQuantity
+        int $ticketAdultPrice,
+        int $ticketAdultQuantity,
+        int $ticketKidPrice,
+        int $ticketKidQuantity,
+        int $ticketVipPrice,
+        int $ticketVipQuantity
     ): float {
         return (
             ($ticketAdultPrice * $ticketAdultQuantity) +

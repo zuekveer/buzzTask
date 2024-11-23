@@ -4,6 +4,7 @@ namespace App\Domain\Entity\Ticket;
 
 use App\Domain\Entity\Order\Order;
 use Doctrine\ORM\Mapping as ORM;
+
 #[ORM\Entity]
 #[ORM\Table(name: 'tickets')]
 class Ticket

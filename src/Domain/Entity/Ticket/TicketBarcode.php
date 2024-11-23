@@ -48,4 +48,3 @@ class TicketBarcode
         return $this->barcode;
     }
 }
-

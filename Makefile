@@ -39,3 +39,5 @@ assets-build:
 
 assets-watch:
 	@docker compose run node yarn watch
+fixer:
+	@docker compose run --rm php-cli vendor/bin/php-cs-fixer fix
