@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Presentation\Http\App\Controller\Order;
 
+use App\Domain\Repository\Order\OrderRepositoryInterface;
 use App\Infrastructure\Service\Order\OrderService;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,6 +25,7 @@ class OrderController extends AbstractController
 
     public function create(Request $request): JsonResponse
     {
+        // Using toArray() to parse JSON body
         $data = $request->toArray();
 
         // Ensure required fields are present in the request data
