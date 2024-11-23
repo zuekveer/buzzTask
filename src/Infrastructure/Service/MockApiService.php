@@ -8,6 +8,7 @@ class MockApiService
 {
     public function mockApiRequest(string $url, array $data): array
     {
+        // Simulating the responses based on URL
         $responses = match ($url) {
             'https://api.site.com/book' => [
                 ['message' => 'order successfully booked'],
@@ -23,6 +24,7 @@ class MockApiService
             default => [['error' => 'unknown endpoint']],
         };
 
+        // Return a random response from the array
         return $responses[array_rand($responses)];
     }
 }

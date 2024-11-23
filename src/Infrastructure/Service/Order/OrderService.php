@@ -38,11 +38,22 @@ class OrderService
         $equalPrice = ($ticketAdultPrice * $ticketAdultQuantity) + ($ticketKidPrice * $ticketKidQuantity);
         $barcode = null;
 
+        // Log input data for debugging
+        $this->logger->info('Creating order with data', [
+            'eventId' => $eventId,
+            'eventDate' => $eventDate,
+            'ticketAdultPrice' => $ticketAdultPrice,
+            'ticketAdultQuantity' => $ticketAdultQuantity,
+            'ticketKidPrice' => $ticketKidPrice,
+            'ticketKidQuantity' => $ticketKidQuantity,
+            'equalPrice' => $equalPrice
+        ]);
+
         // Start a transaction for better data integrity
         $this->em->beginTransaction();
 
         try {
-            // Generate a unique barcode
+            // Generate a unique barcode and attempt booking
             do {
                 $barcode = $this->generateUniqueBarcode();
                 $response = $this->mockApiService->mockApiRequest('https://api.site.com/book', [
@@ -54,12 +65,12 @@ class OrderService
                     'ticket_kid_quantity' => $ticketKidQuantity,
                     'barcode' => $barcode,
                 ]);
-            } while (isset($response['error']));
+            } while (isset($response['error']) && $response['error'] === 'barcode already exists');
 
-            // Retry logic for approving the order
+            // After successful booking, try approving the order
             $this->approveOrder($barcode);
 
-            // Create and save the order
+            // Create the Order object
             $order = (new Order())
                 ->setEventId($eventId)
                 ->setEventDate($eventDate)
@@ -71,13 +82,26 @@ class OrderService
                 ->setEqualPrice($equalPrice)
                 ->setCreatedAt(new \DateTimeImmutable());
 
+            // Log the created order data for debugging
+            $this->logger->info('Order created', ['order' => $order]);
+
+            // Save the Order to the repository
             $this->orderRepository->save($order);
 
             // Commit the transaction
             $this->em->commit();
         } catch (\Exception $e) {
             $this->em->rollback();
-            $this->logger->error('Failed to create order', ['exception' => $e]);
+            $this->logger->error('Failed to create order', [
+                'exception' => $e,
+                'eventId' => $eventId,
+                'eventDate' => $eventDate,
+                'ticketAdultPrice' => $ticketAdultPrice,
+                'ticketAdultQuantity' => $ticketAdultQuantity,
+                'ticketKidPrice' => $ticketKidPrice,
+                'ticketKidQuantity' => $ticketKidQuantity,
+                'barcode' => $barcode,
+            ]);
             throw $e; // Rethrow the exception after logging
         }
     }
@@ -95,22 +119,26 @@ class OrderService
     {
         $maxRetries = 3;
         $retryCount = 0;
-        $approveResponse = null;
 
         while ($retryCount < $maxRetries) {
             $approveResponse = $this->mockApiService->mockApiRequest('https://api.site.com/approve', ['barcode' => $barcode]);
 
             if (!isset($approveResponse['error'])) {
-                break; // Exit loop if approval is successful
+                return; // Approval successful
             }
+
+            $this->logger->warning('Approval attempt failed', [
+                'barcode' => $barcode,
+                'attempt' => $retryCount + 1,
+                'error' => $approveResponse['error'],
+            ]);
 
             $retryCount++;
-            if ($retryCount === $maxRetries) {
-                throw new \RuntimeException("Failed to approve order after {$maxRetries} attempts: {$approveResponse['error']}");
-            }
-
-            // Optional delay before retrying
-            sleep(1);
+            sleep(1); // Optional: Add delay between retries
         }
+
+        // Log and throw error only if all attempts fail
+        $this->logger->error('Order approval failed after retries', ['barcode' => $barcode]);
+        throw new \RuntimeException("Failed to approve order after {$maxRetries} attempts: no seats");
     }
 }
