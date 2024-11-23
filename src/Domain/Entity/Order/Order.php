@@ -11,6 +11,10 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\HasLifecycleCallbacks]
 class Order
 {
+
+    #[ORM\OneToMany(targetEntity: 'App\Domain\Entity\Ticket\Ticket', mappedBy: 'order')]
+    private iterable $tickets;  // relation to tickets
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer', unique: true)]
@@ -19,6 +23,9 @@ class Order
     #[ORM\OneToMany(targetEntity: 'App\Domain\Entity\Ticket\Ticket', mappedBy: 'order', cascade: ['persist'])]
     private $tickets;  // relation to tickets
 
+    #[ORM\Column(type: 'float', precision: 10, scale: 2)]
+    private float $totalPrice;
+
     #[ORM\Column(type: 'integer')]
     private int $eventId;
 
@@ -26,16 +33,22 @@ class Order
     private string $eventDate;
 
     #[ORM\Column(type: 'integer')]
-    private int $ticketAdultPrice;
+    private int $ticketAdultPrice;    // Added Adult price field
 
     #[ORM\Column(type: 'integer')]
-    private int $ticketAdultQuantity;
+    private int $ticketAdultQuantity; // Added Adult quantity field
 
     #[ORM\Column(type: 'integer')]
-    private int $ticketKidPrice;
+    private int $ticketKidPrice;    // Added Kid price field
 
     #[ORM\Column(type: 'integer')]
-    private int $ticketKidQuantity;
+    private int $ticketKidQuantity; // Added Kid quantity field
+
+    #[ORM\Column(type: 'integer')]
+    private int $ticketVipPrice; // Added VIP price field
+
+    #[ORM\Column(type: 'integer')]
+    private int $ticketVipQuantity; // Added VIP quantity field
 
     #[ORM\Column(type: 'string', length: 120, unique: true)]
     private string $barcode;
@@ -48,21 +61,6 @@ class Order
 
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $updatedAt;
-
-    #[ORM\PrePersist]
-    public function setCreatedAt(): self
-    {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
-        return $this;
-    }
-
-    #[ORM\PreUpdate]
-    public function setUpdatedAt(): self
-    {
-        $this->updatedAt = new \DateTimeImmutable();
-        return $this;
-    }
 
     public function getId(): int
     {
@@ -135,6 +133,28 @@ class Order
         return $this->ticketKidQuantity;
     }
 
+    public function setTicketVipPrice(int $ticketVipPrice): self
+    {
+        $this->ticketVipPrice = $ticketVipPrice; // Set VIP price
+        return $this;
+    }
+
+    public function getTicketVipPrice(): int
+    {
+        return $this->ticketVipPrice;
+    }
+
+    public function setTicketVipQuantity(int $ticketVipQuantity): self
+    {
+        $this->ticketVipQuantity = $ticketVipQuantity; // Set VIP quantity
+        return $this;
+    }
+
+    public function getTicketVipQuantity(): int
+    {
+        return $this->ticketVipQuantity;
+    }
+
     public function setBarcode(string $barcode): self
     {
         $this->barcode = $barcode;
@@ -173,5 +193,41 @@ class Order
     public function getTickets(): mixed
     {
         return $this->tickets;
+    }
+
+    public function getTotalPrice(): float
+    {
+        return $this->totalPrice;
+    }
+
+    public function setTotalPrice(float $totalPrice): self
+    {
+        $this->totalPrice = $totalPrice;
+        return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function setCreatedAt(): self
+    {
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
+        return $this;
+    }
+
+    #[ORM\PreUpdate]
+    public function setUpdatedAt(): self
+    {
+        $this->updatedAt = new \DateTimeImmutable();
+        return $this;
+    }
+
+    // New method to calculate total price
+    public function calculateTotalPrice(): void
+    {
+        $this->totalPrice = (
+            ($this->ticketAdultPrice * $this->ticketAdultQuantity) +
+            ($this->ticketKidPrice * $this->ticketKidQuantity) +
+            ($this->ticketVipPrice * $this->ticketVipQuantity)
+        );
     }
 }

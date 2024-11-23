@@ -25,3 +25,9 @@ docker-compose.override.yml
 /node_modules/
 /public/build/
 ###< symfony/webpack-encore-bundle ###
+
+###> friendsofphp/php-cs-fixer ###
+/.php-cs-fixer.php
+/.php-cs-fixer.dist.php
+/.php-cs-fixer.cache
+###< friendsofphp/php-cs-fixer ###

@@ -30,47 +30,60 @@ class OrderService
     public function createOrder(
         int $eventId,
         string $eventDate,
-        int $ticketAdultPrice,
-        int $ticketAdultQuantity,
-        int $ticketKidPrice,
-        int $ticketKidQuantity
+        array $tickets
     ): void {
-        $equalPrice = ($ticketAdultPrice * $ticketAdultQuantity) + ($ticketKidPrice * $ticketKidQuantity);
+        // Extract ticket details
+        $ticketAdultPrice = $tickets['adult']['price'] ?? null;
+        $ticketAdultQuantity = $tickets['adult']['quantity'] ?? 0;
+        $ticketKidPrice = $tickets['kid']['price'] ?? null;
+        $ticketKidQuantity = $tickets['kid']['quantity'] ?? 0;
+        $ticketVipPrice = $tickets['vip']['price'] ?? null;
+        $ticketVipQuantity = $tickets['vip']['quantity'] ?? 0;
+
+        if ($ticketAdultPrice === null || $ticketKidPrice === null || $ticketVipPrice === null) {
+            throw new \InvalidArgumentException('Ticket prices cannot be null.');
+        }
+
+        // Calculate the total price based on quantities and prices
+        $totalPrice = $this->calculateTotalPrice(
+            $ticketAdultPrice,
+            $ticketAdultQuantity,
+            $ticketKidPrice,
+            $ticketKidQuantity,
+            $ticketVipPrice,
+            $ticketVipQuantity
+        );
+
+        $equalPrice = $totalPrice; // Set equalPrice to the calculated total price
+
         $barcode = null;
 
-        // Log input data for debugging
         $this->logger->info('Creating order with data', [
             'eventId' => $eventId,
             'eventDate' => $eventDate,
-            'ticketAdultPrice' => $ticketAdultPrice,
-            'ticketAdultQuantity' => $ticketAdultQuantity,
-            'ticketKidPrice' => $ticketKidPrice,
-            'ticketKidQuantity' => $ticketKidQuantity,
-            'equalPrice' => $equalPrice
+            'tickets' => $tickets,
+            'totalPrice' => $totalPrice,
+            'equalPrice' => $equalPrice,
         ]);
 
-        // Start a transaction for better data integrity
         $this->em->beginTransaction();
 
         try {
-            // Generate a unique barcode and attempt booking
+            // Generate unique barcode and book
             do {
                 $barcode = $this->generateUniqueBarcode();
                 $response = $this->mockApiService->mockApiRequest('https://api.site.com/book', [
                     'event_id' => $eventId,
                     'event_date' => $eventDate,
-                    'ticket_adult_price' => $ticketAdultPrice,
-                    'ticket_adult_quantity' => $ticketAdultQuantity,
-                    'ticket_kid_price' => $ticketKidPrice,
-                    'ticket_kid_quantity' => $ticketKidQuantity,
+                    'tickets' => $tickets,
                     'barcode' => $barcode,
                 ]);
             } while (isset($response['error']) && $response['error'] === 'barcode already exists');
 
-            // After successful booking, try approving the order
+            // Approve the order
             $this->approveOrder($barcode);
 
-            // Create the Order object
+            // Create Order Entity
             $order = (new Order())
                 ->setEventId($eventId)
                 ->setEventDate($eventDate)
@@ -78,38 +91,44 @@ class OrderService
                 ->setTicketAdultQuantity($ticketAdultQuantity)
                 ->setTicketKidPrice($ticketKidPrice)
                 ->setTicketKidQuantity($ticketKidQuantity)
+                ->setTicketVipPrice($ticketVipPrice)
+                ->setTicketVipQuantity($ticketVipQuantity)
                 ->setBarcode($barcode)
+                ->setTotalPrice($totalPrice)
                 ->setEqualPrice($equalPrice)
                 ->setCreatedAt(new \DateTimeImmutable());
 
-            // Log the created order data for debugging
-            $this->logger->info('Order created', ['order' => $order]);
-
-            // Save the Order to the repository
             $this->orderRepository->save($order);
-
-            // Commit the transaction
             $this->em->commit();
         } catch (\Exception $e) {
             $this->em->rollback();
             $this->logger->error('Failed to create order', [
                 'exception' => $e,
-                'eventId' => $eventId,
-                'eventDate' => $eventDate,
-                'ticketAdultPrice' => $ticketAdultPrice,
-                'ticketAdultQuantity' => $ticketAdultQuantity,
-                'ticketKidPrice' => $ticketKidPrice,
-                'ticketKidQuantity' => $ticketKidQuantity,
-                'barcode' => $barcode,
+                'tickets' => $tickets,
             ]);
-            throw $e; // Rethrow the exception after logging
+            throw $e;
         }
+    }
+
+    private function calculateTotalPrice(
+        int $ticketAdultPrice,
+        int $ticketAdultQuantity,
+        int $ticketKidPrice,
+        int $ticketKidQuantity,
+        int $ticketVipPrice,
+        int $ticketVipQuantity
+    ): float {
+        return (
+            ($ticketAdultPrice * $ticketAdultQuantity) +
+            ($ticketKidPrice * $ticketKidQuantity) +
+            ($ticketVipPrice * $ticketVipQuantity)
+        );
     }
 
     private function generateUniqueBarcode(): string
     {
         do {
-            $barcode = bin2hex(random_bytes(6)); // Generate a random 12-character barcode
+            $barcode = bin2hex(random_bytes(6));
         } while ($this->orderRepository->findByBarcode($barcode));
 
         return $barcode;
@@ -121,24 +140,22 @@ class OrderService
         $retryCount = 0;
 
         while ($retryCount < $maxRetries) {
-            $approveResponse = $this->mockApiService->mockApiRequest('https://api.site.com/approve', ['barcode' => $barcode]);
+            $response = $this->mockApiService->mockApiRequest('https://api.site.com/approve', ['barcode' => $barcode]);
 
-            if (!isset($approveResponse['error'])) {
-                return; // Approval successful
+            if (!isset($response['error'])) {
+                return;
             }
 
             $this->logger->warning('Approval attempt failed', [
                 'barcode' => $barcode,
                 'attempt' => $retryCount + 1,
-                'error' => $approveResponse['error'],
+                'error' => $response['error'],
             ]);
 
             $retryCount++;
-            sleep(1); // Optional: Add delay between retries
+            sleep(1);
         }
 
-        // Log and throw error only if all attempts fail
-        $this->logger->error('Order approval failed after retries', ['barcode' => $barcode]);
         throw new \RuntimeException("Failed to approve order after {$maxRetries} attempts: no seats");
     }
 }
