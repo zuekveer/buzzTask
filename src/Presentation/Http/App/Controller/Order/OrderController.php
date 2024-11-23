@@ -104,14 +104,6 @@ class OrderController extends AbstractController
                 return new JsonResponse(['error' => 'Order not found.'], Response::HTTP_NOT_FOUND);
             }
 
-            // Get barcodes for the order (through related tickets)
-            $barcodes = [];
-            foreach ($order->getTickets() as $ticket) {
-                foreach ($ticket->getBarcodes() as $barcode) {
-                    $barcodes[] = $barcode->getBarcode();
-                }
-            }
-
             return new JsonResponse([
                 'id' => $order->getId(),
                 'event_id' => $order->getEventId(),
@@ -120,7 +112,7 @@ class OrderController extends AbstractController
                 'ticket_adult_quantity' => $order->getTicketAdultQuantity(),
                 'ticket_kid_price' => $order->getTicketKidPrice(),
                 'ticket_kid_quantity' => $order->getTicketKidQuantity(),
-                'barcodes' => $barcodes,  // Fetch and return barcodes
+                'barcodes' => $order->getBarcode(),  // Fetch and return barcodes
                 'equal_price' => $order->getEqualPrice(),
                 'created' => $order->getCreatedAt()->format('Y-m-d H:i:s'),
             ]);

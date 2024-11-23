@@ -11,14 +11,13 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\HasLifecycleCallbacks]
 class Order
 {
-
-    #[ORM\OneToMany(targetEntity: 'App\Domain\Entity\Ticket\Ticket', mappedBy: 'order')]
-    private iterable $tickets;  // relation to tickets
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer', unique: true)]
     private ?int $id;
+
+    #[ORM\OneToMany(targetEntity: 'App\Domain\Entity\Ticket\Ticket', mappedBy: 'order', cascade: ['persist'])]
+    private $tickets;  // relation to tickets
 
     #[ORM\Column(type: 'integer')]
     private int $eventId;
@@ -51,16 +50,18 @@ class Order
     private \DateTimeImmutable $updatedAt;
 
     #[ORM\PrePersist]
-    public function setCreatedAt(): void
+    public function setCreatedAt(): self
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
+        return $this;
     }
 
     #[ORM\PreUpdate]
-    public function setUpdatedAt(): void
+    public function setUpdatedAt(): self
     {
         $this->updatedAt = new \DateTimeImmutable();
+        return $this;
     }
 
     public function getId(): int
@@ -164,5 +165,13 @@ class Order
     public function getUpdatedAt(): \DateTimeImmutable
     {
         return $this->updatedAt;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTickets(): mixed
+    {
+        return $this->tickets;
     }
 }
