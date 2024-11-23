@@ -11,6 +11,10 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\HasLifecycleCallbacks]
 class Order
 {
+
+    #[ORM\OneToMany(targetEntity: 'App\Domain\Entity\Ticket\Ticket', mappedBy: 'order')]
+    private iterable $tickets;  // relation to tickets
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer', unique: true)]
