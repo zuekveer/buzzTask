@@ -1,0 +1,12 @@
+nelmio_api_doc:
+  documentation:
+    info:
+      title: 'Order API'
+      description: 'API documentation for managing orders'
+      version: '1.0.0'
+
+  areas:
+    path_patterns:
+      - ^/api(?!/doc$)
+  models:
+    use_jms: false # Default is false; if you're using JMS Serializer, set it to true
