@@ -110,6 +110,31 @@ class OrderService
         }
     }
 
+    public function getOrderById(int $id): ?array
+    {
+        $order = $this->orderRepository->find($id);
+
+        if (!$order) {
+            return null;
+        }
+
+        return [
+            'id' => $order->getId(),
+            'eventId' => $order->getEventId(),
+            'eventDate' => $order->getEventDate(),
+            'ticketAdultPrice' => $order->getTicketAdultPrice(),
+            'ticketAdultQuantity' => $order->getTicketAdultQuantity(),
+            'ticketKidPrice' => $order->getTicketKidPrice(),
+            'ticketKidQuantity' => $order->getTicketKidQuantity(),
+            'ticketVipPrice' => $order->getTicketVipPrice(),
+            'ticketVipQuantity' => $order->getTicketVipQuantity(),
+            'barcode' => $order->getBarcode(),
+            'totalPrice' => $order->getTotalPrice(),
+            'equalPrice' => $order->getEqualPrice(),
+            'createdAt' => $order->getCreatedAt()->format('Y-m-d H:i:s'),
+        ];
+    }
+
     private function calculateTotalPrice(
         int $ticketAdultPrice,
         int $ticketAdultQuantity,
